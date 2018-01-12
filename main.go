@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 
 	"math/rand"
 	"time"
@@ -15,7 +16,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
-
 
 type Payload struct {
 	Token       string
@@ -53,22 +53,21 @@ type CommandReply struct {
 	Attachments  []ImageAttachment `json:"attachments"`
 }
 
-
 func main() {
-    godotenv.Load()
+	godotenv.Load()
 
-    algoliaCliAppId, envSet := os.LookupEnv("ALGOLIA_APP_ID")
-    algoliaCliApiKey, envSet := os.LookupEnv("ALGOLIA_API_KEY")
-    SlackCommandToken, envSet := os.LookupEnv("SLACK_CMD_TOKEN")
-    if (!envSet) {
-        log.Fatal("Please set the ALGOLIA_APP_ID, ALGOLIA_API_KEY and SLACK_CMD_TOKEN environment variables")
-    }
+	algoliaCliAppId, envSet := os.LookupEnv("ALGOLIA_APP_ID")
+	algoliaCliApiKey, envSet := os.LookupEnv("ALGOLIA_API_KEY")
+	SlackCommandToken, envSet := os.LookupEnv("SLACK_CMD_TOKEN")
+	if !envSet {
+		log.Fatal("Please set the ALGOLIA_APP_ID, ALGOLIA_API_KEY and SLACK_CMD_TOKEN environment variables")
+	}
 
 	searchClient := algoliasearch.NewClient(algoliaCliAppId, algoliaCliApiKey)
 	searchIndex := searchClient.InitIndex("classicprogrammerpaintings")
 	searchParams := algoliasearch.Map{
 		"typoTolerance": "min",
-		"hitsPerPage": 1000,
+		"hitsPerPage":   1000,
 	}
 
 	seed := rand.NewSource(time.Now().Unix())
@@ -83,7 +82,7 @@ func main() {
 		} else {
 			res, _ := searchIndex.Search(payload.Text, searchParams)
 			if len(res.Hits) < 1 {
-				io.WriteString(w, "No results for " + payload.Text)
+				io.WriteString(w, "No results for "+payload.Text)
 			} else {
 				w.Header().Set("Content-Type", "application/json")
 				index := rnd.Intn(len(res.Hits))
@@ -105,6 +104,6 @@ func main() {
 		}
 	})
 
-    log.Println("Listening on 127.0.0.1:8000")
+	log.Println("Listening on 127.0.0.1:8000")
 	http.ListenAndServe("127.0.0.1:8000", router)
 }
