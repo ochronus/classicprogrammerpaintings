@@ -13,3 +13,7 @@
 ## testing in dev mode
                                                                                            
 Use [Localtunnel](https://localtunnel.github.io/www/) to pipe traffic from your dev machine
+
+## protips
+
+* if you call the slack command without parameters it returns a random image from the whole index
